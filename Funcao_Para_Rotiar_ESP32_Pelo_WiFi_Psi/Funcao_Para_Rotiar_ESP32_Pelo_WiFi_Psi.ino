@@ -342,6 +342,16 @@ const char* Home_page =  R"rawliteral(
                 link.click();
                 document.body.removeChild(link);
             }
+            /*
+            function abrirGrafico(){
+                fetch("/graphs").then(response => response.text()).then(data => {
+                    document.open();
+                    document.write(data);
+                    document.close();
+                });
+            }
+            */
+
         </script>
 
     </body>
@@ -440,10 +450,18 @@ const char* Graph_page = R"rawliteral(
                 <div id= "cond_temp" class="grafico" ></div>
         </div>
         <br>
-        <a href="/home"><button>Voltar</button></a>
+        <button onclick="Voltar()">Voltar</button>
         <script>
             const xArray = [1, 2, 3, 4, 5 ];
             const yArray = [1, 2, 3, 4, 5];
+
+            function Voltar(){
+                fetch("/home").then(response => response.text()).then(data => {
+                    document.open();
+                    document.write(data);
+                    document.close();
+                });
+            }
 
             function criarTrace(cor){
                 return{
@@ -471,10 +489,10 @@ const char* Graph_page = R"rawliteral(
 
             Plotly.newPlot("tempera_in_temp", [criarTrace('red')], Layout("Temperatura Interna X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
             Plotly.newPlot("tempera_out_temp", [criarTrace('blue')], Layout("Temperatura Externa X Tempo", "Tempo [s]", "Temperatura Externa [°C]"),config);
-            Plotly.newPlot("ph_temp", [criarTrace('42F32B')], Layout("pH X Tempo", "Tempo [s]", "pH"),config);
-            Plotly.newPlot("corrent_temp", [criarTrace('FF391F')], Layout("Corrente X Tempo", "Tempo [s]", "Corrente [A]"),config);
-            Plotly.newPlot("volt_temp", [criarTrace('4B6EBE')], Layout("Tensão X Tempo", "Tempo [s]", "Tensão [V]"),config);
-            Plotly.newPlot("poten_temp", [criarTrace('AD4FCF')], Layout("Potência  X Tempo", "Tempo [s]", "Potência [W]"),config);
+            Plotly.newPlot("ph_temp", [criarTrace('#42F32B')], Layout("pH X Tempo", "Tempo [s]", "pH"),config);
+            Plotly.newPlot("corrent_temp", [criarTrace('#FF391F')], Layout("Corrente X Tempo", "Tempo [s]", "Corrente [A]"),config);
+            Plotly.newPlot("volt_temp", [criarTrace('#4B6EBE')], Layout("Tensão X Tempo", "Tempo [s]", "Tensão [V]"),config);
+            Plotly.newPlot("poten_temp", [criarTrace('#AD4FCF')], Layout("Potência  X Tempo", "Tempo [s]", "Potência [W]"),config);
             Plotly.newPlot("oxi_temp", [criarTrace('#00a6c7')], Layout("Oxigênio  X Tempo", "Tempo [s]", "Oxigênio [mg/L]"),config);
             Plotly.newPlot("cond_temp", [criarTrace('yellow')], Layout("Condutividade Elétrica  X Tempo", "Tempo [s]", "Condutividade Elétrica [μS/cm]"),config);
         </script>
