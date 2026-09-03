@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Laboratório de Piscicultura - Graph</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <style>
+            body{
+                margin: 0;
+                min-height: 100vh;
+                text-align: center;
+                font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            }
+
+            h1{
+                color: rgb(44, 44, 44);
+                background-color: aquamarine;
+                padding: 15px;
+                margin: 0 0 25px 0;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            }
+
+            select{
+                background-color: aquamarine;
+                margin: 0 0 25px 0;
+                font-size: 20px;
+                border-radius: 5px;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                color: darkcyan;
+            }
+
+            .graficos{
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+                padding: 0 20px;
+            }
+
+            .grafico{
+                width: 600px;
+                height: 400px;
+                background-color: white;
+                border: 1px solid #d5d5d5;
+                border-radius: 12px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+                overflow: hidden;
+            }
+            button{
+                color: white;
+                margin: 25px 0;
+                border: none;
+                cursor: pointer;
+                transition: 0.2s;
+                background-color: rgb(235, 74, 74);
+                font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+                border-radius:10px;
+                font-weight: bold;
+                width: 80px;
+                height: 40px;
+            }
+
+            button:hover{
+                background-color: rgb(210, 55, 55);
+                transform: scale(1.05);
+            }
+
+        </style>
+    </head>
+    <body>
+        
+        <h1>Gráficos</h1>
+
+        <select id="selecionar">
+            <option>--- Selecione um tanque ---</option>
+        </select>
+        
+        <div class="graficos">
+                <div id= "tempera_in_temp" class="grafico"></div>
+                <div id= "tempera_out_temp" class="grafico"></div>
+                <div id= "ph_temp" class="grafico"></div>
+                <div id= "oxi_temp" class="grafico" ></div>
+                <div id= "corrent_temp" class="grafico"></div>
+                <div id= "volt_temp" class="grafico"></div>
+                <div id= "poten_temp" class="grafico" ></div>
+                <div id= "cond_temp" class="grafico" ></div>
+        </div>
+        <br>
+        <a href="/home"><button>Voltar</button></a>
+        <script>
+            const xArray = [1, 2, 3, 4, 5 ];
+            const yArray = [1, 2, 3, 4, 5];
+
+            function criarTrace(cor){
+                return{
+                    x: xArray,
+                    y: yArray,
+                    mode: 'lines+markers',
+                    marker: {size: 8, color: cor},
+                    line: {color: cor, width: 3}
+                };
+            }
+
+            const config = {
+                responsive: true,
+                displayModeBar: false
+            };
+
+            function Layout(titulo, eixo_x, eixo_y){
+                const layout = {
+                    title: {text : titulo, font:{ size : 20}},
+                    xaxis: {range: [0,6], title: eixo_x},
+                    yaxis: {range: [0,6], title: eixo_y},
+                };
+                return layout;
+            }
+
+            Plotly.newPlot("tempera_in_temp", [criarTrace('red')], Layout("Temperatura Interna X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
+            Plotly.newPlot("tempera_out_temp", [criarTrace('blue')], Layout("Temperatura Externa X Tempo", "Tempo [s]", "Temperatura Externa [°C]"),config);
+            Plotly.newPlot("ph_temp", [criarTrace('42F32B')], Layout("pH X Tempo", "Tempo [s]", "pH"),config);
+            Plotly.newPlot("corrent_temp", [criarTrace('FF391F')], Layout("Corrente X Tempo", "Tempo [s]", "Corrente [A]"),config);
+            Plotly.newPlot("volt_temp", [criarTrace('4B6EBE')], Layout("Tensão X Tempo", "Tempo [s]", "Tensão [V]"),config);
+            Plotly.newPlot("poten_temp", [criarTrace('AD4FCF')], Layout("Potência  X Tempo", "Tempo [s]", "Potência [W]"),config);
+            Plotly.newPlot("oxi_temp", [criarTrace('#00a6c7')], Layout("Oxigênio  X Tempo", "Tempo [s]", "Oxigênio [mg/L]"),config);
+            Plotly.newPlot("cond_temp", [criarTrace('yellow')], Layout("Condutividade Elétrica  X Tempo", "Tempo [s]", "Condutividade Elétrica [μS/cm]"),config);
+        </script>
+
+    </body>
+</html>

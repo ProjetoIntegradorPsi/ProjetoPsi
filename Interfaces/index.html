@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Laboratório de Piscicultura - Login</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body{
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: top;
+                text-align: center;
+                font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            }
+            img{
+                color: rgb(44, 44, 44);
+                border-radius:5px;
+                height: 200px;
+                width: 200px;
+                padding: 10px;
+                font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            }
+            h3{
+                text-align: left;
+            }
+            input{
+                width: 100%;
+            }
+            .mens{
+                color: red;
+                visibility: hidden;
+            }
+            .carre{
+                color: aqua;
+                font-size: 30px;
+                -webkit-text-stroke: 1px black;
+                visibility: hidden;
+            }  
+        </style>
+    </head>
+    <body>
+        <div>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvaLJgS4oo2U_Bpz4YUFpbag38lIaI3WVHxlFSvVz4FnMK5W1Nq_NgQ8P3&s=10">
+            <h3>Usuário:</h3>
+            <input id="usuario" type="text">
+            <h3>Senha:</h3>
+            <input id="senha" type="password">
+            <p class="mens" id="mensagem">Por favor, coloque o Usuário e a Senha !</p>
+            <button onclick="Entrar()">Entrar</button>
+            <p id="carregando" class="carre">Carregando...</p>
+        </div>
+        <script>
+            function Entrar(){
+                const usuario = document.getElementById("usuario").value;
+                const senha = document.getElementById("senha").value;
+                const mensagem = document.getElementById("mensagem");
+                const carregando = document.getElementById("carregando");
+                if(usuario == "" || senha == ""){
+                    mensagem.style.visibility = "visible";
+                }else{
+                    carregando.style.visibility = "visible";
+                    fetch("/login?usuario=" + encodeURIComponent(usuario) + "&senha=" + encodeURIComponent(senha))
+                        .then(resposta => resposta.text())
+                        .then(dados => {
+                            document.open();
+                            document.write(dados);
+                            document.close();
+                        });
+                }
+            }
+        </script>
+    </body>
+</html>
