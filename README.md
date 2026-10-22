@@ -38,9 +38,11 @@ Desenvolver um sistema de monitoramento para auxiliar no acompanhamento das cond
 - INA3221 
 - QR Code
 
-### Software
+### 👨‍💻 Software
 
 - 🐬 MySQL
+- 🧊 InfluxDB
+- 📈 Grafana  
 - 🖥️ Visual Studio Code (VSCODE)
 - 🔌 Arduino IDE
 - 🐙 Git/GitHub 
