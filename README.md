@@ -31,7 +31,7 @@ Desenvolver um sistema de monitoramento para auxiliar no acompanhamento das cond
 
 ## 🛠️ Tecnologias utilizadas
 
-### Hardware
+### 🔌 Hardware
 - ESP32 
 - DS18B20 
 - Sensor de pH 
