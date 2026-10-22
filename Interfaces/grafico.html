@@ -78,8 +78,8 @@
         </select>
         
         <div class="graficos">
-                <div id= "tempera_in_temp" class="grafico"></div>
-                <div id= "tempera_out_temp" class="grafico"></div>
+                <div id= "tempera_temp_int" class="grafico"></div>
+                <div id= "tempera_temp_ext" class="grafico"></div>
                 <div id= "ph_temp" class="grafico"></div>
                 <div id= "oxi_temp" class="grafico" ></div>
                 <div id= "corrent_temp" class="grafico"></div>
@@ -125,8 +125,8 @@
                 return layout;
             }
 
-            Plotly.newPlot("tempera_in_temp", [criarTrace('red')], Layout("Temperatura Interna X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
-            Plotly.newPlot("tempera_out_temp", [criarTrace('blue')], Layout("Temperatura Externa X Tempo", "Tempo [s]", "Temperatura Externa [°C]"),config);
+            Plotly.newPlot("tempera_temp_int", [criarTrace('blue')], Layout("Temperatura Interna X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
+            Plotly.newPlot("tempera_temp_ext", [criarTrace('orange')], Layout("Temperatura Externo X Tempo", "Tempo [s]", "Temperatura Externa [°C]"),config);
             Plotly.newPlot("ph_temp", [criarTrace('#42F32B')], Layout("pH X Tempo", "Tempo [s]", "pH"),config);
             Plotly.newPlot("corrent_temp", [criarTrace('#FF391F')], Layout("Corrente X Tempo", "Tempo [s]", "Corrente [A]"),config);
             Plotly.newPlot("volt_temp", [criarTrace('#4B6EBE')], Layout("Tensão X Tempo", "Tempo [s]", "Tensão [V]"),config);

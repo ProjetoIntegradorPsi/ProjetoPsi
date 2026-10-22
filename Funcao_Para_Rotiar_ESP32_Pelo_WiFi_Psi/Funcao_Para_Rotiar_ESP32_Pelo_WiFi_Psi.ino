@@ -1,12 +1,5 @@
 #include <WiFi.h>
-
-// Acessar a rede do rotiador 
-const char* ssd = "ENZO";
-const char* pass = "Jato2000";
-
-// Login do site
-const char* usuario = "admin";
-const char* senha = "BlobFish321";
+#include "arduino_secrets.h"
 
 const char* Login_page = R"rawliteral(
 <!DOCTYPE html>
@@ -276,8 +269,7 @@ const char* Home_page =  R"rawliteral(
                         <tr>
                             <th>Nome</th>
                             <th>Data e Hora</th>
-                            <th>Temperatura Interna [°C]</th>
-                            <th>Temperatura Externa [°C]</th>
+                            <th>Temperatura [°C]</th>
                             <th>pH</th>
                             <th>Oxigênio [mg/L]</th>
                             <th>Tensão [V]</th>
@@ -292,7 +284,6 @@ const char* Home_page =  R"rawliteral(
                             <td>Tanque 01</td>
                             <td>29/08/2026 18:00</td>
                             <td>25,4</td>
-                            <td>24,8</td>
                             <td>7,2</td>
                             <td>6,5</td>
                             <td>12,0</td>
@@ -440,8 +431,7 @@ const char* Graph_page = R"rawliteral(
         </select>
         
         <div class="graficos">
-                <div id= "tempera_in_temp" class="grafico"></div>
-                <div id= "tempera_out_temp" class="grafico"></div>
+                <div id= "tempera_temp" class="grafico"></div>
                 <div id= "ph_temp" class="grafico"></div>
                 <div id= "oxi_temp" class="grafico" ></div>
                 <div id= "corrent_temp" class="grafico"></div>
@@ -487,8 +477,7 @@ const char* Graph_page = R"rawliteral(
                 return layout;
             }
 
-            Plotly.newPlot("tempera_in_temp", [criarTrace('red')], Layout("Temperatura Interna X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
-            Plotly.newPlot("tempera_out_temp", [criarTrace('blue')], Layout("Temperatura Externa X Tempo", "Tempo [s]", "Temperatura Externa [°C]"),config);
+            Plotly.newPlot("tempera_temp", [criarTrace('orange')], Layout("Temperatura X Tempo", "Tempo [s]", "Temperatura Interna [°C]"),config);
             Plotly.newPlot("ph_temp", [criarTrace('#42F32B')], Layout("pH X Tempo", "Tempo [s]", "pH"),config);
             Plotly.newPlot("corrent_temp", [criarTrace('#FF391F')], Layout("Corrente X Tempo", "Tempo [s]", "Corrente [A]"),config);
             Plotly.newPlot("volt_temp", [criarTrace('#4B6EBE')], Layout("Tensão X Tempo", "Tempo [s]", "Tensão [V]"),config);
@@ -504,8 +493,9 @@ const char* Graph_page = R"rawliteral(
 NetworkServer server(80);
 
 void setup() {
+  
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssd, pass); // ajustar quando chegar no lab.
+  WiFi.begin(SECRET_SSID, SECRET_PASS);
   Serial.begin(115200);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -517,14 +507,16 @@ void setup() {
   Serial.println();
   Serial.print("IP: ");
   Serial.print(WiFi.localIP());
+
+  verifyConnectionDB();
   
-  //pinMode(x, OUTPUT);
   server.begin();
+  
 }
 
 void loop() {
+    //gravarInfluxDB(random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0));
     NetworkClient client = server.accept();
-    
     if(client){
       String currentLine = "";
       String request = "";
@@ -555,10 +547,10 @@ void loop() {
 
                 String senhaRecebida = request.substring( inicioSenha, fimSenha );
 
-                Serial.println("Usuario recebido: " + usuarioRecebido);
-                Serial.println("Senha recebida: " + senhaRecebida);
+                //Serial.println("Usuario recebido: " + usuarioRecebido);
+                //Serial.println("Senha recebida: " + senhaRecebida);
 
-                if(usuarioRecebido == usuario && senhaRecebida == senha){
+                if(usuarioRecebido == SECRET_USERNAME && senhaRecebida == SECRET_USERPASS){
                   client.print(Home_page);
                 }else{
                   client.print(Login_page);
