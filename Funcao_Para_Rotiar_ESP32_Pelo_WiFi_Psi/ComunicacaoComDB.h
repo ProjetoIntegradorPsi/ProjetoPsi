@@ -30,7 +30,7 @@ void gravarInfluxDB(float tempInterna, float tempExterna, float ph, float oxigen
     ponto.addField("condutividade", condutividade);
 
     if (influxClient.writePoint(ponto)) {
-        Serial.println("Dados enviados ao InfluxDB!");
+        //Serial.println("Dados enviados ao InfluxDB!");
     } else {
         Serial.print("Erro no InfluxDB: ");
         Serial.println(influxClient.getLastErrorMessage());
@@ -47,4 +47,62 @@ void verifyConnectionDB(){
         Serial.print("Falha no InfluxDB: ");
         Serial.println(influxClient.getLastErrorMessage());
     }
+}
+
+//Formatar Data Horario
+
+String formatarHoraLocal(String raw){
+  // raw vem assim: 2026-11-25T15:00:00.123Z (UTC)
+  int a, m, d, h, mi, s;
+  if(sscanf(raw.c_str(), "%d-%d-%dT%d:%d:%d", &a, &m, &d, &h, &mi, &s) != 6) return raw;
+
+  struct tm t = {};
+  t.tm_year  = a - 1900;
+  t.tm_mon   = m - 1;
+  t.tm_mday  = d;
+  t.tm_hour  = h - 3;      
+  t.tm_min   = mi;
+  t.tm_sec   = s;
+  t.tm_isdst = 0;
+  mktime(&t);
+
+  char buf[20];
+  strftime(buf, sizeof(buf), "%d/%m/%Y %H:%M:%S", &t);
+  return String(buf);
+}
+
+// Ler histórico do InfluxoDB
+
+String lerHistoricoDB() {
+  String query =
+    "from(bucket: \"" INFLUXDB_BUCKET "\") "
+    "|> range(start: -24h) "
+    "|> filter(fn: (r) => r._measurement == \"medicoes\") "
+    "|> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\") "
+    "|> sort(columns:[\"_time\"], desc:true) "
+    "|> limit(n:50)";
+
+  FluxQueryResult result = influxClient.query(query);   // 'client' = seu InfluxDBClient
+  String json = "[";
+  bool primeiro = true;
+
+  while (result.next()) {
+    if (!primeiro) json += ",";
+    primeiro = false;
+    json += "{";
+    json += "\"nome\":\"" + result.getValueByName("tanque").getString() + "\",";
+    json += "\"hora\":\"" + formatarHoraLocal(result.getValueByName("_time").getRawValue()) + "\",";
+    json += "\"temperatura_interna\":" + String(result.getValueByName("temperatura_interna").getDouble()) + ",";
+    json += "\"temperatura_externa\":" + String(result.getValueByName("temperatura_externa").getDouble()) + ",";
+    json += "\"ph\":" + String(result.getValueByName("ph").getDouble()) + ",";
+    json += "\"oxigenio\":" + String(result.getValueByName("oxigenio").getDouble()) + ",";
+    json += "\"tensao\":" + String(result.getValueByName("tensao").getDouble()) + ",";
+    json += "\"corrente\":" + String(result.getValueByName("corrente").getDouble()) + ",";
+    json += "\"potencia\":" + String(result.getValueByName("potencia").getDouble()) + ",";
+    json += "\"condutividade\":" + String(result.getValueByName("condutividade").getDouble());
+    json += "}";
+  }
+  json += "]";
+  result.close();
+  return json;
 }

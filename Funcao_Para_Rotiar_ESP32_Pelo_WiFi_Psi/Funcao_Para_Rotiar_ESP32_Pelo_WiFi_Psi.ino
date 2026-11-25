@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include "arduino_secrets.h"
+#include "ComunicacaoComDB.h"
+
 
 const char* Login_page = R"rawliteral(
 <!DOCTYPE html>
@@ -41,7 +43,21 @@ const char* Login_page = R"rawliteral(
                 font-size: 30px;
                 -webkit-text-stroke: 1px black;
                 visibility: hidden;
-            }  
+            }
+
+            button {
+              width: 100%;
+              margin-top: 20px;
+              padding: 12px;
+              font-size: 16px;
+              font-weight: bold;
+              border: none;
+              border-radius: 5px;
+              background-color: aquamarine;
+              cursor: pointer;
+            }
+            button:hover { background-color: #66d9c0; }
+            button:disabled { opacity: 0.6; cursor: wait; }
         </style>
     </head>
     <body>
@@ -52,13 +68,14 @@ const char* Login_page = R"rawliteral(
             <h3>Senha:</h3>
             <input id="senha" type="password">
             <p class="mens" id="mensagem">Por favor, coloque o Usuário e a Senha !</p>
-            <button onclick="Entrar()">Entrar</button>
+            <button id="botaoEntrar" onclick="Entrar()">Entrar</button>
             <p id="carregando" class="carre">Carregando...</p>
         </div>
         <script>
             function Entrar(){
                 const usuario = document.getElementById("usuario").value;
                 const senha = document.getElementById("senha").value;
+                const botaoEntrar  = document.getElementById("botaoEntrar");
                 const mensagem = document.getElementById("mensagem");
                 const carregando = document.getElementById("carregando");
                 if(usuario == "" || senha == ""){
@@ -74,6 +91,14 @@ const char* Login_page = R"rawliteral(
                         });
                 }
             }
+
+            // Enter na senha: aperta o botão Entrar
+            document.getElementById("senha").addEventListener("keydown", function(e){
+              if(e.key === "Enter"){
+                botaoEntrar.click();
+              }
+            });
+            
         </script>
     </body>
 </html>
@@ -256,8 +281,8 @@ const char* Home_page =  R"rawliteral(
 
             <!-- Pesquisa -->
             <div class="pesquisa">
-                <input type="text" placeholder="Buscar..." id="campoBusca">
-                <button type="button">Pesquisar</button>
+                <input type="text" placeholder="Buscar..." onkeyup="pesquisarTabela()" id="campoBusca">
+                <button type="button" onclick="pesquisarTabela()">Pesquisar</button>
             </div>
 
 
@@ -269,7 +294,8 @@ const char* Home_page =  R"rawliteral(
                         <tr>
                             <th>Nome</th>
                             <th>Data e Hora</th>
-                            <th>Temperatura [°C]</th>
+                            <th>Temperatura Interna [°C]</th>
+                            <th>Temperatura Externa [°C]</th>
                             <th>pH</th>
                             <th>Oxigênio [mg/L]</th>
                             <th>Tensão [V]</th>
@@ -279,18 +305,8 @@ const char* Home_page =  R"rawliteral(
                         </tr>
                     </thead>
 
-                    <tbody>
-                        <tr>
-                            <td>Tanque 01</td>
-                            <td>29/08/2026 18:00</td>
-                            <td>25,4</td>
-                            <td>7,2</td>
-                            <td>6,5</td>
-                            <td>12,0</td>
-                            <td>0,45</td>
-                            <td>2,0</td>
-                            <td>50</td>
-                        </tr>
+                    <tbody id="corpoTabela">
+                        
                     </tbody>
 
                 </table>
@@ -300,8 +316,6 @@ const char* Home_page =  R"rawliteral(
 
             <!-- Botões -->
             <div class="botoes">
-
-                <a href="/graphs"><button type="button">Mostrar Gráfico</button></a>
 
                 <button type="button" onclick="baixarTabelaCSV()">Baixar</button>
 
@@ -333,23 +347,64 @@ const char* Home_page =  R"rawliteral(
                 link.click();
                 document.body.removeChild(link);
             }
-            /*
-            function abrirGrafico(){
-                fetch("/graphs").then(response => response.text()).then(data => {
-                    document.open();
-                    document.write(data);
-                    document.close();
-                });
-            }
-            */
 
+            function pesquisarTabela() {
+              const pesquisa = document
+              .getElementById("campoBusca")
+              .value.toLowerCase();
+
+              const tabela = document.getElementById("mytabela");
+              const linhas = tabela.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+              for (let i = 0; i < linhas.length; i++) {
+                 const texto = linhas[i].innerText.toLowerCase();
+
+                if (texto.includes(pesquisa)) {
+                  linhas[i].style.display = "";
+                } else {
+                  linhas[i].style.display = "none";
+                }
+              } 
+            }
+
+          async function atualizarTabela(){
+            try {
+              const resposta = await fetch("/dados");
+              if (!resposta.ok) throw new Error("Erro HTTP: " + resposta.status);
+                const dados = await resposta.json();      // agora é uma lista
+
+                const tbody = document.getElementById("corpoTabela");
+                tbody.innerHTML = "";
+
+                dados.forEach(d => {
+                const linha = document.createElement("tr");
+                [d.nome, d.hora, d.temperatura_interna, d.temperatura_externa, d.ph, d.oxigenio,
+                d.tensao, d.corrente, d.potencia, d.condutividade].forEach(v => {
+                  const td = document.createElement("td");
+                  td.textContent = v ?? "N/A";
+                  linha.appendChild(td);
+                });
+                tbody.appendChild(linha);
+              });
+
+              pesquisarTabela();   // reaplica o filtro depois de recarregar
+            } catch (erro) {
+              console.error("Erro ao atualizar tabela:", erro);
+            }
+            setTimeout(atualizarTabela, 5000);
+          }
+
+          atualizarTabela();
+          
         </script>
 
     </body>
 
 </html>
 )rawliteral";
- 
+
+/* 
+// Geracoes futuras para analise grafica na interface.
 const char* Graph_page = R"rawliteral(
 <!DOCTYPE html>
 <html>
@@ -489,7 +544,7 @@ const char* Graph_page = R"rawliteral(
     </body>
 </html>
 )rawliteral"; 
-
+*/
 NetworkServer server(80);
 
 void setup() {
@@ -507,15 +562,26 @@ void setup() {
   Serial.println();
   Serial.print("IP: ");
   Serial.print(WiFi.localIP());
-
+  
   verifyConnectionDB();
   
   server.begin();
   
 }
 
+// Determinar o tempo da gravacao
+unsigned long ultimaGravacao = 0;
+const unsigned long INTERVALO_GRAVACAO = 5000;
+
 void loop() {
-    //gravarInfluxDB(random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0), random(1.0, 10.0));
+    
+    //Intervalo de gravacao
+    if(millis() - ultimaGravacao >= INTERVALO_GRAVACAO){
+        ultimaGravacao = millis();
+        // Coloca as informacoes dentro do gravarInfluxDB!
+        //gravarInfluxDB(random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0, random(10, 100) / 10.0);
+    }
+    //Connction    
     NetworkClient client = server.accept();
     if(client){
       String currentLine = "";
@@ -525,18 +591,16 @@ void loop() {
           char cr = client.read();
           if(cr == '\n'){
             if(currentLine.length() == 0){
-              
-              client.println("HTTP/1.1 200 OK");
-              client.println("Content-type:text/html");
-              client.println("Connection: close");
-              client.println();
-              
+
+              String tipo = "text/html; charset=utf-8";
+              String corpo;
 
               // Aqui coloca o .HTML
               if(request.indexOf("GET /home") >= 0){
-                client.print(Home_page);
-              }else if(request.indexOf("GET /graphs")>= 0){
-                client.print(Graph_page);
+                corpo = Home_page;
+              }else if(request.indexOf("GET /dados")>= 0){
+                tipo = "application/json; charset=utf-8";
+                corpo = lerHistoricoDB();// vai ler o historico gravado.
               }else if(request.indexOf("GET /login")>= 0){
                 int inicioUsuario = request.indexOf("usuario=") + 8;
                 int inicioSenha = request.indexOf("senha=") + 6;
@@ -551,17 +615,19 @@ void loop() {
                 //Serial.println("Senha recebida: " + senhaRecebida);
 
                 if(usuarioRecebido == SECRET_USERNAME && senhaRecebida == SECRET_USERPASS){
-                  client.print(Home_page);
+                  corpo  = Home_page;
                 }else{
-                  client.print(Login_page);
+                  corpo = Login_page;
                 }
                 
               }else{
-                client.print(Login_page);
+                corpo = Login_page;
               }
-              //client.print(Login_page);
-              
+              client.println("HTTP/1.1 200 OK");
+              client.println("Content-type: " + tipo);
+              client.println("Connection: close");
               client.println();
+              client.print(corpo);
               break;
             }else{
 
@@ -574,7 +640,7 @@ void loop() {
           }else if(cr != '\r'){
             currentLine += cr;
           }
-
+          
           // Aqui coloca a funcao de cada click do botao.
           /*
           if(currentLine.endsWith("GET /home")){
