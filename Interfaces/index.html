@@ -37,7 +37,21 @@
                 font-size: 30px;
                 -webkit-text-stroke: 1px black;
                 visibility: hidden;
-            }  
+            }
+
+            button {
+              width: 100%;
+              margin-top: 20px;
+              padding: 12px;
+              font-size: 16px;
+              font-weight: bold;
+              border: none;
+              border-radius: 5px;
+              background-color: aquamarine;
+              cursor: pointer;
+            }
+            button:hover { background-color: #66d9c0; }
+            button:disabled { opacity: 0.6; cursor: wait; }
         </style>
     </head>
     <body>
@@ -48,13 +62,14 @@
             <h3>Senha:</h3>
             <input id="senha" type="password">
             <p class="mens" id="mensagem">Por favor, coloque o Usuário e a Senha !</p>
-            <button onclick="Entrar()">Entrar</button>
+            <button id="botaoEntrar" onclick="Entrar()">Entrar</button>
             <p id="carregando" class="carre">Carregando...</p>
         </div>
         <script>
             function Entrar(){
                 const usuario = document.getElementById("usuario").value;
                 const senha = document.getElementById("senha").value;
+                const botaoEntrar  = document.getElementById("botaoEntrar");
                 const mensagem = document.getElementById("mensagem");
                 const carregando = document.getElementById("carregando");
                 if(usuario == "" || senha == ""){
@@ -70,6 +85,14 @@
                         });
                 }
             }
+
+            // Enter na senha: aperta o botão Entrar
+            document.getElementById("senha").addEventListener("keydown", function(e){
+              if(e.key === "Enter"){
+                botaoEntrar.click();
+              }
+            });
+            
         </script>
     </body>
 </html>

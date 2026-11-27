@@ -174,8 +174,8 @@
 
             <!-- Pesquisa -->
             <div class="pesquisa">
-                <input type="text" placeholder="Buscar..." id="campoBusca">
-                <button type="button">Pesquisar</button>
+                <input type="text" placeholder="Buscar..." onkeyup="pesquisarTabela()" id="campoBusca">
+                <button type="button" onclick="pesquisarTabela()">Pesquisar</button>
             </div>
 
 
@@ -198,19 +198,8 @@
                         </tr>
                     </thead>
 
-                    <tbody>
-                        <tr>
-                            <td>Tanque 01</td>
-                            <td>29/08/2026 18:00</td>
-                            <td>25,4</td>
-                            <td>30,4</td>
-                            <td>7,2</td>
-                            <td>6,5</td>
-                            <td>12,0</td>
-                            <td>0,45</td>
-                            <td>2,0</td>
-                            <td>50</td>
-                        </tr>
+                    <tbody id="corpoTabela">
+                        
                     </tbody>
 
                 </table>
@@ -220,8 +209,6 @@
 
             <!-- Botões -->
             <div class="botoes">
-
-                <a href="/graphs"><button type="button">Mostrar Gráfico</button></a>
 
                 <button type="button" onclick="baixarTabelaCSV()">Baixar</button>
 
@@ -253,16 +240,55 @@
                 link.click();
                 document.body.removeChild(link);
             }
-            /*
-            function abrirGrafico(){
-                fetch("/graphs").then(response => response.text()).then(data => {
-                    document.open();
-                    document.write(data);
-                    document.close();
-                });
-            }
-            */
 
+            function pesquisarTabela() {
+              const pesquisa = document
+              .getElementById("campoBusca")
+              .value.toLowerCase();
+
+              const tabela = document.getElementById("mytabela");
+              const linhas = tabela.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+              for (let i = 0; i < linhas.length; i++) {
+                 const texto = linhas[i].innerText.toLowerCase();
+
+                if (texto.includes(pesquisa)) {
+                  linhas[i].style.display = "";
+                } else {
+                  linhas[i].style.display = "none";
+                }
+              } 
+            }
+
+          async function atualizarTabela(){
+            try {
+              const resposta = await fetch("/dados");
+              if (!resposta.ok) throw new Error("Erro HTTP: " + resposta.status);
+                const dados = await resposta.json();      // agora é uma lista
+
+                const tbody = document.getElementById("corpoTabela");
+                tbody.innerHTML = "";
+
+                dados.forEach(d => {
+                const linha = document.createElement("tr");
+                [d.nome, d.hora, d.temperatura_interna, d.temperatura_externa, d.ph, d.oxigenio,
+                d.tensao, d.corrente, d.potencia, d.condutividade].forEach(v => {
+                  const td = document.createElement("td");
+                  td.textContent = v ?? "N/A";
+                  linha.appendChild(td);
+                });
+                tbody.appendChild(linha);
+              });
+
+              pesquisarTabela();   // reaplica o filtro depois de recarregar
+            } catch (erro) {
+              console.error("Erro ao atualizar tabela:", erro);
+            }
+            setTimeout(atualizarTabela, 5000);
+          }
+
+          atualizarTabela();
+          
         </script>
 
     </body>
