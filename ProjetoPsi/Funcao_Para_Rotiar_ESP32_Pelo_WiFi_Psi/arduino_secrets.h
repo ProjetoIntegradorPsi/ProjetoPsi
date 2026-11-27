@@ -1,6 +1,6 @@
 // Acessar a rede do rotiador
-#define SECRET_SSID "ENZO" 
-#define SECRET_PASS "Jato2000"
+#define SECRET_SSID "*****" 
+#define SECRET_PASS "*****"
 
 // Login do site
 #define SECRET_USERNAME "admin" 
